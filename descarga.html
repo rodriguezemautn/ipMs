@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script>
+        function runScript() {
+            var OSName = "Unknown OS";
+            if (navigator.appVersion.indexOf("Win") != -1) OSName = "Windows";
+            if (navigator.appVersion.indexOf("Mac") != -1) OSName = "MacOS";
+            if (navigator.appVersion.indexOf("X11") != -1) OSName = "UNIX";
+            if (navigator.appVersion.indexOf("Linux") != -1) OSName = "Linux";
+
+            var script = "ip.bat";
+            if (OSName === "Linux") {
+                script = "ip.sh";
+            }
+            localStorage.setItem("script", script);
+
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", script, true);
+            xhr.responseType = "blob";
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var a = document.createElement("a");
+                    a.href = window.URL.createObjectURL(xhr.response);
+                    a.download = script;
+                    a.style.display = "none";
+                    document.body.appendChild(a);
+                    a.click();
+
+                    // Abre un cuadro de diálogo para preguntar si desea ejecutar el script
+                    if (confirm("¿Desea ejecutar el script " + script + "?")) {
+                    // Código para ejecutar el script
+                    var path = window.location.pathname;
+                    var scriptPath = path.substring(0, path.lastIndexOf("/")) + "/" + script;
+
+                    if (OSName === "Windows") {
+                        document.execCommand("start", false, scriptPath);
+                    } else if (OSName === "Linux") {
+                        document.execCommand("/bin/bash", false, scriptPath);
+                    }
+                }
+            }
+        };
+            xhr.send();
+        }
+    </script>
+   
+
+    <script>
+        function executeScript() {
+            // Buscar el archivo de script descargado
+            var script = localStorage.getItem("script");
+            if (!script) {
+                alert("No se ha descargado ningún script todavía");
+                return;
+            }
+    
+            // Almacenar el path absoluto del archivo
+            var path = window.location.pathname;
+            var scriptPath = path.substring(0, path.lastIndexOf("/")) + "/" + script;
+    
+            // Ejecutar el script
+            var OSName = "Unknown OS";
+            if (navigator.appVersion.indexOf("Win") != -1) OSName = "Windows";
+            if (navigator.appVersion.indexOf("Mac") != -1) OSName = "MacOS";
+            if (navigator.appVersion.indexOf("X11") != -1) OSName = "UNIX";
+            if (navigator.appVersion.indexOf("Linux") != -1) OSName = "Linux";
+    
+            var output = "";
+            if (OSName === "Windows") {
+                var shell = new ActiveXObject("WScript.Shell");
+                output = shell.Exec(scriptPath).StdOut.ReadAll();
+            } else if (OSName === "Linux") {
+                var exec = require("child_process").exec;
+                exec(scriptPath, function (error, stdout, stderr) {
+                    output = stdout;
+                });
+            }
+    
+            // Mostrar la salida del script en el navegador
+            var outputDiv = document.getElementById("output");
+            outputDiv.innerHTML = output;
+        }
+    </script>
+    
+    
+</head>
+
+<body>
+    <button onclick="runScript()">Descargar y Ejecutar Script</button>
+    <button onclick="executeScript()">Ejecutar Script</button>
+    <div id="output"></div>
+
+</body>
+
+</html>

@@ -1,0 +1,30 @@
+<!-- Archivo HTML -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Terminal xterm.js</title>
+    <script src="xterm.js"></script>
+    <link rel="stylesheet" href="xterm.css" />
+  </head>
+  <body>
+    <div id="terminal"></div>
+    <script>
+      // Crear una nueva instancia de Terminal y asignarla al elemento HTML
+      const term = new Terminal();
+      term.open(document.getElementById('terminal'));
+      
+      // Ejecutar el script que muestra información sobre la red
+      term.write('sh ip.sh');
+      
+      // Capturar la salida del script y guardarla en un archivo de texto
+      term.on('data', function(data) {
+        // Crear un enlace para descargar el archivo de texto
+        var a = document.createElement('a');
+        a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(data);
+        a.download = 'networkinfo.txt';
+        a.innerHTML = 'Descargar archivo de texto';
+        document.body.appendChild(a);
+      });
+    </script>
+  </body>
+</html>
